@@ -52,13 +52,29 @@ public class DungeonGeneration : MonoBehaviour {
 		for (int i = 0; i < nodes.Count; i++) {
 			Vector3 dir = transform.TransformDirection (nodes [i].GetDirection ());
 			if (Physics.Raycast (nodes [i].GetPosition (), dir, 10)) {
-				print ("Node " + nodes [i].GetName () + "hit something");
+				print ("Node " + nodes [i].GetName () + " hit something");
 			} else {
 				availableSpots.Add (nodes [i]);
 			}
 		}
-		int randPlace = Random.Range (0, availableSpots.Count - 1);
-		startPos = nodes [randPlace].GetPosition ();
+		int randPlace = Random.Range (0, availableSpots.Count + 1);
+		switch (nodes [randPlace].GetName()) {
+		case "right":
+			startPos = startPos + new Vector3 (roomMaximum, 0, 0);
+			break;
+		case "left":
+			startPos = startPos - new Vector3 (roomMaximum, 0, 0);
+			break;
+		case "down":
+			startPos = startPos - new Vector3 (0, roomMaximum, 0);
+			break;
+		case "up":
+			startPos = startPos + new Vector3 (0, roomMaximum, 0);
+			break;
+		default:
+			break;
+		}
+		print (nodes [randPlace].GetName ());
 		CreateRoom ();
 	}
 }
