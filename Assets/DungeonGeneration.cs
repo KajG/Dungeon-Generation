@@ -9,8 +9,9 @@ public class DungeonGeneration : MonoBehaviour {
 	public int roomMaximum;
 	public Node node;
 	public List<Node> nodes = new List<Node>();
+	public List<Vector3> corridorPositions = new List<Vector3> ();
+	public GameObject corridor;
 	public Vector3 startPos = new Vector3(0, 0, 0);
-
 	public bool dungeonEnd = false;
 	void Start () {
 		
@@ -22,6 +23,9 @@ public class DungeonGeneration : MonoBehaviour {
 		}
 		if (Input.GetKey (KeyCode.E)) {
 			CheckSpace ();
+		}
+		if (Input.GetKeyDown (KeyCode.D)) {
+			CreateCorridor ();
 		}
 	}
 	public void CreateRoom(){
@@ -38,6 +42,7 @@ public class DungeonGeneration : MonoBehaviour {
 					GameObject obj = Instantiate (cube, new Vector3 (x + startPos.x, y + startPos.y, 0), Quaternion.identity);
 					if (x == 0 && y == 0) {
 						startPos = obj.transform.position;
+						corridorPositions.Add (new Vector3(startPos.x + randomWidth / 2, startPos.y + randomLength / 2, 0));
 					}
 				}
 			}
@@ -49,7 +54,7 @@ public class DungeonGeneration : MonoBehaviour {
 			nodes.Add (left);
 			nodes.Add (up);
 			nodes.Add (right);
-			CheckSpace ();
+			//CheckSpace ();
 		}
 	}
 	public void CheckSpace(){
@@ -85,6 +90,15 @@ public class DungeonGeneration : MonoBehaviour {
 		CreateRoom ();
 	}
 	public void CreateCorridor(){
-
+		float t = 0;
+		for (int i = 1; i < corridorPositions.Count; i++) {
+			while (t <= 1) {
+				t += 0.15f;
+				print ("asdsds");
+				Vector3 dir = Vector3.Lerp (corridorPositions [i], corridorPositions [i - 1], t);
+				Instantiate (corridor, dir, Quaternion.identity);
+			}
+			t = 0;
+		}
 	}
 }
