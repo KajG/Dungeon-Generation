@@ -3,19 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DungeonGeneration : MonoBehaviour {
-	public GameObject cube;
-	public GameObject rayCastPoint;
 	public int roomMinimum;
 	public int roomMaximum;
+	public int randomLength;
+	public int randomWidth;
+	public bool dungeonEnd = false;
+	public GameObject cube;
+	public GameObject rayCastPoint;
+	public GameObject corridor;
 	public Node node;
+	public Vector3 startPos = new Vector3(0, 0, 0);
 	public List<Node> tempNodes = new List<Node>();
 	public List<Node> nodes = new List<Node> ();
 	public List<Vector3> roomPositions = new List<Vector3> ();
-	public GameObject corridor;
-	public Vector3 startPos = new Vector3(0, 0, 0);
-	public bool dungeonEnd = false;
-	public int randomLength;
-	public int randomWidth;
+	public List<Room> randomRoomSize = new List<Room> ();
+	public class Room
+	{
+		public int randomWidth;
+		public int randomLength;
+		public Room(int width, int length){
+			randomWidth = width;
+			randomLength = length;
+		}
+	}
 	void Start () {
 		
 	}
@@ -34,11 +44,13 @@ public class DungeonGeneration : MonoBehaviour {
 	public void CreateRoom(){
 		if (!dungeonEnd) {
 			tempNodes.Clear ();
-			 randomLength = Random.Range (roomMinimum, roomMaximum);
-			 randomWidth = Random.Range (roomMinimum, roomMaximum);
+     		randomLength = Random.Range (roomMinimum, roomMaximum);
+	    	randomWidth = Random.Range (roomMinimum, roomMaximum);
 			if (randomLength % 2 == 0 || randomWidth % 2 == 0) {
 				CreateRoom ();
 				return;
+			} else {
+				randomRoomSize.Add (new Room (randomWidth, randomLength));
 			}
 			for (int x = 0; x < randomWidth; x++) {
 				for (int y = 0; y < randomLength; y++) {
@@ -62,7 +74,7 @@ public class DungeonGeneration : MonoBehaviour {
 	}
 	public void CheckSpace(){
 		List<Node> availableSpots = new List<Node> ();
-		float randomSpawnDistance = Random.Range(roomMaximum, roomMaximum * 1.3f);
+		float randomSpawnDistance = Random.Range(roomMaximum, roomMaximum * 1.2f);
 		for (int i = 0; i < tempNodes.Count; i++) {
 			Vector3 dir = transform.TransformDirection (tempNodes [i].GetDirection ());
 			if (!Physics.Raycast (tempNodes [i].GetPosition (), dir, randomSpawnDistance)) {
@@ -95,31 +107,30 @@ public class DungeonGeneration : MonoBehaviour {
 		CreateRoom ();
 	}
 	public void CreateCorridor(){
-		for (int i = 1; i < nodes.Count; i++) {
+		for (int i = 1; i < nodes.Count + 1; i++) {
 			float t = 0;
 			while (t <= 1) {
 				switch (nodes [i - 1].GetName ()) {
 				case "down":
-					Vector3 dir = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + randomWidth / 2, roomPositions[i].y + randomLength, 0), t);
+					Vector3 dir = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3 (roomPositions [i].x + randomRoomSize[i].randomWidth / 2, roomPositions [i].y + randomRoomSize[i].randomLength - 0.2f, 0), t);
 					Instantiate (corridor, dir, Quaternion.identity);
-
 					break;
 				case "left":
-					Vector3 dir3 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + randomWidth, roomPositions[i].y + randomLength / 2, 0), t);
-					Instantiate (corridor, dir3, Quaternion.identity);
+					Vector3 dir1 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + randomRoomSize[i].randomWidth - 0.2f, roomPositions[i].y + randomRoomSize[i].randomLength / 2, 0), t);
+					Instantiate (corridor, dir1, Quaternion.identity);
 					break;
 				case "up":
-					Vector3 dir2 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + randomWidth / 2, roomPositions[i].y, 0), t);
+					Vector3 dir2 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + randomRoomSize[i].randomWidth / 2, roomPositions[i].y - 0.2f, 0), t);
 					Instantiate (corridor, dir2, Quaternion.identity);
 					break;
 				case "right":
-					Vector3 dir1 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x, roomPositions[i].y + randomLength / 2, 0), t);
-					Instantiate (corridor, dir1, Quaternion.identity);
+					Vector3 dir3 = Vector3.Lerp (nodes [i - 1].GetPosition (), new Vector3(roomPositions [i].x + 0.2f, roomPositions[i].y + randomRoomSize[i].randomLength / 2, 0), t);
+					Instantiate (corridor, dir3, Quaternion.identity);
 					break;
 				default:
 					break;
 				}
-				t += 0.1f;
+				t += 0.01f;
 			}
 		}
 	}
